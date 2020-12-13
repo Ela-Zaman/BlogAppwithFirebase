@@ -23,8 +23,6 @@ import { AuthContext } from "../providers/AuthProvider";
 
 
 
-import { getDataJSON, storeDataJSON,fetchAllItems,AddPost ,removeData} from "../functions/AsyncStorageFunctions";
-import { TouchableOpacity } from "react-native-gesture-handler";
 
 const HomeScreen = (props) => {
    

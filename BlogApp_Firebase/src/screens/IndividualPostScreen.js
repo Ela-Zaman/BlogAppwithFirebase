@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, StyleSheet, View } from "react-native";
 import { Avatar, Button, Card, Input, Text } from "react-native-elements";
 import AppHeader from "../components/AppHeader";
-import { getDataJSON, storeDataJSON,fetchAllItems,AddItem ,removeData,AddNotification} from "../functions/AsyncStorageFunctions";
+
 import { AuthContext } from "../providers/AuthProvider";
 import * as firebase from 'firebase';
 import "firebase/firestore";
