@@ -2,8 +2,7 @@ import React from "react";
 
 import { View, StyleSheet,TouchableOpacity,ActivityIndicator,FlatList } from "react-native";
 import { Card, Button, Text, Avatar } from "react-native-elements";
-import { AntDesign } from "@expo/vector-icons";
-import { useNavigation } from '@react-navigation/native';
+
 
 const NotificationCard = (props) => {
 

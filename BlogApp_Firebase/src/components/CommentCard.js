@@ -1,9 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import { Card, Button, Text, Avatar } from "react-native-elements";
-import { AntDesign } from "@expo/vector-icons";
-import { useNavigation } from '@react-navigation/native';
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { Card, Text } from "react-native-elements";
 
 
 const CommentCard = (props) => {

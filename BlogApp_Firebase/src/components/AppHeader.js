@@ -9,7 +9,7 @@ import {
 
   Header,
 } from "react-native-elements";
-import { set } from "react-native-reanimated";
+
 import * as firebase from 'firebase';
 import "firebase/firestore";
 
