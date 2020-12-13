@@ -8,12 +8,13 @@ import { getDataJSON, storeDataJSON,fetchAllItems,AddPost ,removeData} from "../
 import AppHeader from "../components/AppHeader";
 import NotificationCard from "../components/NotificationCard"
 
-
+import * as firebase from 'firebase';
+import "firebase/firestore";
 const NotificationScreen = (props) => {
 
   const authContext = useContext(AuthContext)  
 
-  let temp="Notification";
+
 
 
   const [notification, setNotification] = useState([]);
@@ -26,70 +27,45 @@ const NotificationScreen = (props) => {
 
 
 
- 
-
   const loadNotifications = async () => {
-
-   
-
-    setLoading(false);
-      
-   
-     
-    
-      const response = await getDataJSON(temp)
-      console.log(response)
-      if(response){
-      let r=response["Notification"];
-      let N=[]
-       
-        r.forEach((element) => {
-          if (element.item.author==authContext.CurrentUser.name)
-          {
-            N.push(element.item)
-           
-         
-          
-          }
-
-
+    setLoading(true);
+    firebase
+      .firestore()
+      .collection("users")
+      .doc(authContext.CurrentUser.uid)
+      .collection("notification")
+      .orderBy("created_at", "desc")
+      .onSnapshot((querySnapshot) => {
+        let temp_notifications = [];
+        querySnapshot.forEach((doc) => {
+          temp_notifications.push({
+            id: doc.id,
+            data: doc.data(),
+          });
         });
-
-        console.log(authContext.CurrentUser.name)
-    
-       setNotification(N);
-
-      };
-     
-
-
-    
-      }
-
-   
-  
-
-         
-
-  
+        setNotification(temp_notifications);
+        setLoading(false);
+      })
+    ;
+      
+  };
 
   useEffect(() => {
-
-     
-    
     loadNotifications();
-   
-  },[] );
+  }, []);    
+
+
+      
   if (!loading) {
 
-    console.log(authContext)
-
+console.log(notification)
   
   return (
     <AuthContext.Consumer>
       {(auth) => (
         <View style={styles.viewStyle}>
          <AppHeader navigation={props.navigation}/> 
+         
          <FlatList
               data={notification}
               renderItem={function ({ item }) {
@@ -100,10 +76,12 @@ const NotificationScreen = (props) => {
 
                 return (
                   <NotificationCard navigation={ props.navigation} 
-                  author={item.author}
-                  body={item.body}
-                  id={item.postid}
-                  commenter={item.commenter}
+                  author={item.data.author}
+                  body={item.data.post_body}
+                  id={item.data.post_id}
+                  
+                  commenter={item.data.commenter}
+                  type={item.data.type}
                   />
                 );
               }}

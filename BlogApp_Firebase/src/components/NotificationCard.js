@@ -12,8 +12,9 @@ const NotificationCard = (props) => {
     <TouchableOpacity 
     onPress={ function()
       {
+        
        
-        props.navigation.navigate("IndividualPost",{author: props.author,body:props.body,postid:props.id,commenter:props.commenter})
+        props.navigation.navigate("IndividualPost",{author: props.author,author_id:props.author_id,body:props.body,postid:props.id,commenter:props.commenter})
       
             }}>
       <Card>

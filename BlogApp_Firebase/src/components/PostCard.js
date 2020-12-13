@@ -5,6 +5,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { useNavigation } from '@react-navigation/native';
 
 const PostCard = (props) => {
+  const date = props.created_at.toDate().toDateString()
   return (
     <Card >
       <View
@@ -23,7 +24,7 @@ const PostCard = (props) => {
           {props.author}
         </Text>
       </View>
-      <Text style={{ fontStyle: "italic" }}> {props.title}</Text>
+      <Text style={{ fontStyle: "italic" }}> posted on {date} </Text>
       <Text
         style={{
           paddingVertical: 10,
@@ -36,7 +37,8 @@ const PostCard = (props) => {
         <Button
           type="outline"
           title="  Like (17)"
-          icon={<AntDesign name="like2" size={24} color="dodgerblue" />}
+          icon={<AntDesign name="like2" size={24} color="dodgerblue" 
+          />}
         />
         <Button type="solid" title="Comments" 
         onPress={function(){
@@ -44,7 +46,7 @@ const PostCard = (props) => {
          
          
        
-          props.navigation.navigate("IndividualPost",{author: props.author,body:props.body,postid:props.id,commenter:props.commenter})
+          props.navigation.navigate("IndividualPost",{author: props.author,author_id:props.author_id,body:props.body,postid:props.id,commenter:props.commenter})
         } 
         }
    

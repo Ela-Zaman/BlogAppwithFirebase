@@ -6,6 +6,8 @@ import AsyncStorage from "@react-native-community/async-storage";
 import AppHeader from "../components/AppHeader";
 import {Image} from 'react-native';
 import { removeData } from "../functions/AsyncStorageFunctions";
+import * as firebase from 'firebase';
+import "firebase/firestore";
 const ProfileScreen = (props) => {
   return (
     <AuthContext.Consumer>
@@ -25,7 +27,7 @@ const ProfileScreen = (props) => {
                 } />
             </View>
         <Button title="Delete User" type="outline" onPress={function () {
-                  removeData(auth.CurrentUser.email)
+                   
                   auth.setIsLoggedIn(false);
                   auth.setCurrentUser({});
 
@@ -34,7 +36,7 @@ const ProfileScreen = (props) => {
             />
             <Card>
             <View style={styles.textstyles}>
-              <Text style={styles.textstyles}>Name {auth.CurrentUser.name}</Text>
+              <Text style={styles.textstyles}>Name {auth.CurrentUser.displayName}</Text>
               <Text style={styles.textstyles}>Born On: 23rd March 9999 </Text>
               <Text style={styles.textstyles}>Address: IUT </Text>
             </View>

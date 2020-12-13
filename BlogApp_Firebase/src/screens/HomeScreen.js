@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-
+import * as firebase from 'firebase';
+import "firebase/firestore";
 import {
   ScrollView,
   View,
@@ -21,17 +22,19 @@ import { AntDesign, Entypo } from "@expo/vector-icons";
 import { AuthContext } from "../providers/AuthProvider";
 
 
+
 import { getDataJSON, storeDataJSON,fetchAllItems,AddPost ,removeData} from "../functions/AsyncStorageFunctions";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const HomeScreen = (props) => {
    
-  let temp="Posts";
-  let postId="";
+
 
   const [posts, setPosts] = useState([]);
-  const [UploadPost, setUploadPost] = useState([]);
+  const [UploadPost, setUploadPost] = useState('');
   const [show,setShow]=useState(false)
   const [loading, setLoading] = useState(true);
+
  
  
   const author = props.route.params
@@ -39,31 +42,30 @@ const HomeScreen = (props) => {
  
 
   const loadPosts = async () => {
-
-    setLoading(false);
+    setLoading(true);
+    firebase
+      .firestore()
+      .collection("posts")
+      .orderBy("created_at", "desc")
+      .onSnapshot((querySnapshot) => {
+        let temp_posts = [];
+       
+        querySnapshot.forEach((doc) => {
+          temp_posts.push({
+            id: doc.id,
+            data: doc.data(),
+          });
+        });
+        setPosts(temp_posts);
+        setLoading(false);
+        
+      })
+    ;
       
-   
-     
-    
-      const response = await getDataJSON(temp)
-      if(response){
-      setPosts(response["post"]);
-      console.log(posts)
-      }
-
-   
   };
 
-         
-
-  
-
   useEffect(() => {
-
-     
-    
     loadPosts();
-   
   }, []);
   if (!loading) {
    
@@ -84,43 +86,37 @@ const HomeScreen = (props) => {
             }}
               />
                <Button title="Post" type="outline" onPress={function () {
+
+                    setLoading(true);
+            
                            
-                           let newPost = {
-                              
-                               
-                               author: auth.CurrentUser.name,
-                               body: UploadPost,
-                               
-                           };
-                          
-                          
-                         
-                          
-               //removeData(temp)
-                   let r= AddPost  (temp, newPost);
-                      if(r)
-                       {console.log(r)
-                       setPosts(r)
-                       console.log(posts)
-                      loadPosts()
-                     setShow(true)
-                       
+                           
+           
+                       firebase.firestore().collection('posts').add({
+                         userId: auth.CurrentUser.uid,
+                         body: UploadPost,
+                         author:auth.CurrentUser.displayName,
+                         created_at: firebase.firestore.Timestamp.now(),
+                         likes: [],
+                         comments:[],
+                       }).then(()=>
+                       {
+                        setLoading(false);
+                         alert('Post created Successfully!');
+                       }).catch((error)=>{
+                        setLoading(false);
+                        alert(error)
+
+                       })
                        
                      
                         
                        } 
-                       }} />
+                      }
+                        />
             </Card>
-            <View style={styles.container}>
-        
-              {show ? (
-          <PostCard navigation={ props.navigation} 
-          author={auth.CurrentUser.name}
-          body={UploadPost}
-          user={auth.CurrentUser.name}
-/>
-       ):null}
-    </View>
+           
+
          
 
           
@@ -129,13 +125,20 @@ const HomeScreen = (props) => {
               data={posts}
               renderItem={function ({ item }) {
                 return (
+                  
+                   
+                
                   <PostCard navigation={ props.navigation} 
-                    author={item.item.author}
-                    body={item.item.body}
+                    author={item.data.author}
+                    author_id={item.data.userId}
+                    body={item.data.body}
                     id={item.id}
-                    commenter={auth.CurrentUser.name}
+                    created_at={item.data.created_at}
+                   
+                    commenter={auth.CurrentUser.displayName}
 
                   />
+              
                 );
               }}
             />

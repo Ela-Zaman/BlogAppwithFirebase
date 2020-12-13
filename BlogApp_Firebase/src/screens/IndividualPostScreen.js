@@ -5,65 +5,56 @@ import { Avatar, Button, Card, Input, Text } from "react-native-elements";
 import AppHeader from "../components/AppHeader";
 import { getDataJSON, storeDataJSON,fetchAllItems,AddItem ,removeData,AddNotification} from "../functions/AsyncStorageFunctions";
 import { AuthContext } from "../providers/AuthProvider";
-
+import * as firebase from 'firebase';
+import "firebase/firestore";
 
 import CommentCard from "../components/CommentCard"
 import { ScrollView } from "react-native-gesture-handler";
 
 const IndividualPost = (props) => {
     
-    let temp;
-    let postId="";
     
-    var today = new Date();
-    let fromdate=today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
 
     const [comments, setComments] = useState([]);
     const [UploadComment, setUploadComment] = useState([]);
+    const [commentsNo,setCommentsNo]=useState(0);
    
     const [loading, setLoading] = useState(true);
+    
    
    
     const author = props.route.params
-    postId=author.postid
-   
-    const [no_comments, setno_comments] = useState("");
-    const loadComments = async (id) => {
-        
-     
-        temp =  id+"Comments"
-        setLoading(false);
-        const response = await getDataJSON(temp)
-        if(response){
-        setComments(response["post_comment"]);
-        console.log(comments.length)
-  
-        setno_comments(comments.length)
-
-        
-        }
-
+    let postId=author.postid
    
 
-     
-    };
-  
-           
-  
+    const loadComments = async () => {
+        setLoading(true);
+        firebase
+          .firestore()
+          .collection("posts")
+          .doc(author.postid)
+          .collection("comments")
+          .orderBy("created_at", "desc")
+          .onSnapshot((querySnapshot) => {
+            let temp_comments = [];
+            querySnapshot.forEach((doc) => {
+              temp_comments.push({
+                id: doc.id,
+                data: doc.data(),
+              });
+            });
+            setComments(temp_comments);
+            setCommentsNo(temp_comments.length);
+
+            setLoading(false);
+          })
+        ;
+          
+      };
     
-  
-    useEffect(() => {
-
-       
-      
-      loadComments(postId);
-     
-    }, []);
-  
-      
-
-
-    
+      useEffect(() => {
+        loadComments();
+      }, []);    
     if (!loading) {
     return(
 
@@ -93,7 +84,7 @@ const IndividualPost = (props) => {
                                 {author.author}
                             </Text>
                         </View>
-                        <Text style={{ fontStyle: "italic" }}> {author.title}</Text>
+                        <Text style={{ fontStyle: "italic" }}> {author.created_at}</Text>
                         <Text
                             style={{
                                 paddingVertical: 10,
@@ -104,7 +95,7 @@ const IndividualPost = (props) => {
                         <Card.Divider />
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                             <Text h4Style={{ padding: 10 }}>
-                        21 Likes, {no_comments} Comments
+                        21 Likes, {commentsNo} Comments
                             </Text>
                                 
                                 
@@ -125,40 +116,56 @@ const IndividualPost = (props) => {
                             }}
                         />
                         <Button title="Comment" type="outline" onPress={function () {
-                           
-                            let newComment = {
-                               
-                                postId: author.postid,
-                                author: author.author,
-                                body: UploadComment,
-                                commenter:auth.CurrentUser.name,
-                                date:[fromdate]
-                                
-                            };
-                           
-                           
-                            temp=postId+"Comments"
-                           
-               //   removeData(temp)
-                // removeData("Notification")
-                      let r=AddItem(temp, newComment);
-                       AddNotification("Notification", newComment)
-                    
-                        console.log(r)
-                        setComments(r)
-                       console.log(comments)
-                        loadComments(postId)
-                          
-                        }} />
+
+
+                        setLoading(true);
+                      
+           
+           
+
+                        firebase.firestore().collection('posts').doc(author.postid).collection("comments").add({
+                            post_id:author.postid,
+                            author:author.author,
+                            commenter: author.commenter,
+                            body: UploadComment,
+                            created_at: firebase.firestore.Timestamp.now()
+                          })
+
+                          firebase.firestore().collection('users').doc(author.author_id).collection("notification").add({
+                            post_id:author.postid,
+                            author:author.author,
+                            post_body:author.body,
+                            commenter: author.commenter,
+                            type: "commented",
+                            created_at: firebase.firestore.Timestamp.now()
+                          })
+                       
+       .then(()=>
+       {
+        setLoading(false);
+         alert('Upload Comment Successfully!');
+       }).catch((error)=>{
+        setLoading(false);
+        alert(error)
+
+       })
+       
+     
+        
+       } 
+      }
+        />
+
                     </Card>
                     <FlatList
               data={comments}
               renderItem={function ({ item }) {
                 return (
                   <CommentCard navigation={ props.navigation} 
-                  commenter={item.item.commenter}
-                  body={item.item.body}
-                  date={item.item.date}
+                  commenter={item.data.commenter}
+                  body={item.data.body}
+                  created_at={item.data.created_at}
+
                   />
                 );
               }}
